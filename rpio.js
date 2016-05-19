@@ -1,4 +1,4 @@
-
+var rpio = require('rpio');
 function connectingStatus(n){
   n.status({fill:"red",shape:"ring",text:"connecting"});
 }
@@ -22,17 +22,34 @@ function connectedStatus(n){
 
 
 function init(RED) {
-  RED.nodes.registerType("gpio in",gpioInNode);
-  RED.nodes.registerType("gpio out",gpioOutNode);
+  RED.nodes.registerType("rpio in",gpioInNode);
+  RED.nodes.registerType("rpio out",gpioOutNode);
+
+  rpio.init({
+          gpiomem: true,          /* Use /dev/gpiomem */
+          mapping: 'physical',    /* Use the P1-P40 numbering scheme */
+  });
 
   function gpioInNode(n) {
-    RED.nodes.createNode(this,n);
+    this.pin = n.pin;
+    this.state = n.state;
+    var node = this;
 
+    RED.nodes.createNode(this,n);
   }
 
   function gpioOutNode(n) {
-    RED.nodes.createNode(this,n);
+    this.pin = n.pin;
+    this.state = n.state;
+    var node = this;
 
+    RED.nodes.createNode(this,n);
+    rpio.open(node.pin, rpio.OUTPUT, rpio.LOW);
+
+    node.on('input', function(msg) {
+      //console.log(msg);
+      rpio.write(node.pin, msg.payload);
+    });
   }
 }
 

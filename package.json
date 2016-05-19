@@ -20,5 +20,8 @@
     "nodes": {
       "rpio": "rpio.js"
     }
+  },
+  "dependencies": {
+    "rpio": "^0.9.11"
   }
 }

@@ -1,8 +1,4 @@
-<script type="text/x-red" data-template-name="gpio in">
-    <div class="form-row">
-        <label for="node-input-board"><i class="fa fa-tasks"></i> Board</label>
-        <input type="text" id="node-input-board">
-    </div>
+<script type="text/x-red" data-template-name="rpio in">
     <div class="form-row">
         <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
         <select type="text" id="node-input-state" style="width: 150px;">
@@ -26,38 +22,23 @@
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="gpio in">
-  <p>gpio input node. A node for receiving data from General Purpose Input and Outputs (GPIOs) pins though the use of johnny-five I/O Plugins</p>
+<script type="text/x-red" data-help-name="rpio in">
+  <p>rpio input node. A node for receiving data from General Purpose Input and Outputs (GPIOs) pins though the use of johnny-five I/O Plugins</p>
 </script>
 
-<script type="text/x-red" data-template-name="gpio out">
-    <div class="form-row">
-        <label for="node-input-board"><i class="fa fa-tasks"></i> Board</label>
-        <input type="text" id="node-input-board">
-    </div>
+<script type="text/x-red" data-template-name="rpio out">
     <div class="form-row">
         <label for="node-input-state"><i class="fa fa-wrench"></i> Type</label>
         <select type="text" id="node-input-state" style="width: 200px;">
             <option value="OUTPUT">Digital (0/1)</option>
             <option value="PWM">Analogue (0-255)</option>
-            <option value="SERVO">Servo (0-180)</option>
-            <option value="I2C_READ_REQUEST">I2C Read Request</option>
-            <option value="I2C_WRITE_REQUEST">I2C Write Request</option>
-            <option value="I2C_DELAY">I2C Delay</option>
         </select>
     </div>
     <div class="form-row" id="node-div-pinRow">
         <label for="node-input-pin"><i class="fa fa-circle"></i> Pin</label>
         <input type="text" id="node-input-pin" placeholder="13">
     </div>
-    <div class="form-row" id="node-div-i2cAddressRow">
-        <label for="node-input-i2cAddress"><i class="fa fa-circle"></i> I2C Address</label>
-        <input type="text" id="node-input-i2cAddress" placeholder="13">
-    </div>
-    <div class="form-row" id="node-div-i2cRegisterRow">
-        <label for="node-input-i2cRegister"><i class="fa fa-circle"></i> Register (optional)</label>
-        <input type="text" id="node-input-i2cRegister">
-    </div>
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -65,6 +46,130 @@
     <div class="form-tips" id="node-div-formTipRow"><b>Note:</b> You cannot use the same pin for both output and input.</div>
 </script>
 
-<script type="text/x-red" data-help-name="gpio out">
-  <p>gpio output node. A node for sending data to General Purpose Input and Outputs (GPIOs) pins though the use of johnny-five I/O Plugins</p>
+<script type="text/x-red" data-help-name="rpio out">
+  <p>rpio output node. A node for sending data to General Purpose Input and Outputs (GPIOs) pins though the use of johnny-five I/O Plugins</p>
+</script>
+
+<script type="text/javascript">
+
+
+RED.nodes.registerType('rpio in',{
+    category: 'input',
+    defaults: {
+      name: {value:""},
+      state: {value:"INPUT",required:true},
+      samplingInterval: {value:"300",required:false},
+      pin: {value:"",required:false}
+    },
+    color:"#f6de1d",
+    inputs:0,
+    outputs:1,
+    //icon: "gpiowhite.png",
+    label: function() {
+      return this.name||"GPIO"+this.pin;
+    },
+    oneditprepare: function() {
+
+      var self = this;
+
+      function showInterval(){
+        $( "#node-div-samplingIntervalRow" ).show();
+      }
+      function hideInterval(){
+        $( "#node-div-samplingIntervalRow" ).hide();
+      }
+
+      if(self.state === 'ANALOG'){
+        showInterval();
+      }
+      else{
+        hideInterval();
+      }
+
+      var intervalInput = $( "#node-input-state" );
+      intervalInput.change(function(){
+        console.log('intervalInput changed', this.value);
+        if(this.value === 'ANALOG'){
+          showInterval();
+        }
+        else{
+          hideInterval();
+        }
+      });
+
+    }
+  });
+
+  RED.nodes.registerType('rpio out',{
+    category: 'output',
+    defaults: {
+      name: {value:""},
+      state: {value:"OUTPUT",required:true},
+      pin: {value:"",required:false},
+      i2cDelay: {value:"0",required:false},
+      i2cAddress: {value:"",required:false},
+      i2cRegister: {value:"",required:false},
+      outputs: {value:0},
+      //board: {type:"nodebot", required:true}
+    },
+    color:"#f6de1d",
+    inputs:1,
+    outputs:0,
+    //icon: "gpiowhite.png",
+    align: "right",
+    label: function() {
+      console.log('name', "GPIO"+(this.pin || this.i2cAddress || ''));
+      return this.name||"GPIO"+(this.pin || this.i2cAddress || '');
+    },
+    oneditprepare: function() {
+
+      var self = this;
+
+      function showI2C(){
+        $( "#node-div-i2cAddressRow" ).show();
+        $( "#node-div-i2cRegisterRow" ).show();
+        $( "#node-div-i2cDelayRow" ).show();
+        $( "#node-div-pinRow" ).hide();
+        $( "#node-div-formTipRow" ).hide();
+      }
+      function hideI2C(){
+        $( "#node-div-i2cAddressRow" ).hide();
+        $( "#node-div-i2cRegisterRow" ).hide();
+        $( "#node-div-i2cDelayRow" ).hide();
+        $( "#node-div-pinRow" ).show();
+        $( "#node-div-formTipRow" ).show();
+      }
+
+      if(self.state === 'I2C_READ_REQUEST' || self.state === 'I2C_WRITE_REQUEST' || self.state === 'I2C_DELAY'){
+        showI2C();
+      }
+      else{
+        hideI2C();
+      }
+
+      var stateInput = $( "#node-input-state" );
+      stateInput.change(function(){
+        console.log('stateInput changed', this.value);
+        if(this.value === 'I2C_READ_REQUEST' || this.value === 'I2C_WRITE_REQUEST' || this.value === 'I2C_DELAY'){
+          showI2C();
+        }
+        else{
+          hideI2C();
+        }
+      });
+
+    },
+    oneditsave: function(a) {
+      var stateInput = $( "#node-input-state" );
+      if(stateInput.val() === 'I2C_READ_REQUEST'){
+        this.outputs = 1;
+      }
+      else{
+        this.outputs = 0;
+      }
+      console.log('saving', this, a, stateInput.val());
+    }
+  });
+
+
 </script>
