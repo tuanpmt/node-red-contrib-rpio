@@ -1,0 +1,24 @@
+{
+  "name": "node-red-contrib-rpio",
+  "version": "1.0.0",
+  "description": "NODE RED gpio function for RPI1,2,3",
+  "main": "rpio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tuanpmt/node-red-contrib-rpio.git"
+  },
+  "author": "Tuan PM <tuanpm@live.com> (http://tuanpm.net)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tuanpmt/node-red-contrib-rpio/issues"
+  },
+  "homepage": "https://github.com/tuanpmt/node-red-contrib-rpio#readme",
+  "node-red": {
+    "nodes": {
+      "rpio": "rpio.js"
+    }
+  }
+}
