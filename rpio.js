@@ -19,7 +19,12 @@ function ioErrorStatus(n, err){
 function connectedStatus(n){
   n.status({fill:"green",shape:"dot",text:"connected"});
 }
-
+function onStatus(n) {
+  n.status({fill:"green",shape:"dot",text:"on"});
+}
+function offStatus(n) {
+  n.status({fill:"red",shape:"dot",text:"off"});
+}
 
 function init(RED) {
   RED.nodes.registerType("rpio in",gpioInNode);
@@ -44,11 +49,15 @@ function init(RED) {
     var node = this;
 
     RED.nodes.createNode(this,n);
-    rpio.open(node.pin, rpio.OUTPUT, rpio.LOW);
+    rpio.open(node.pin, rpio.OUTPUT, rpio.HIGH);
 
     node.on('input', function(msg) {
       //console.log(msg);
       rpio.write(node.pin, msg.payload);
+      if(msg.payload == 0)
+        onStatus(node);
+      else
+        offStatus(node);
     });
   }
 }
